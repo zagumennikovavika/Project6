@@ -1,6 +1,6 @@
 #ifndef GRAPH_MASTER_FRONT1_H
 #define GRAPH_MASTER_FRONT1_H
-#include "common1.h"
+#include "common.h"
 
 void Dijkstra(Graph *g, const int *path, int pathLen, int totalWeight, double timeMS);
 char* AskFilename();
