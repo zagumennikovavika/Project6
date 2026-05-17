@@ -53,11 +53,12 @@ int Menu() {
     do {
     printf("Main menu:\n");
     printf("1) Load graph from file\n");
-    printf("2) Find the shortest path between points\n");
-    printf("3) Build an MST (Dijkstra's Algorithm)\n");
-    printf("4) Build an MST (Kruskal's Algorithm)\n");
-    printf("5) Build an MST (Prim's Algorithm)\n");
-    printf("6) Comparison of building algorithms\n");
+    printf("2) Find the shortest path between points"
+           " (Dijkstra's Algorithm)\n");
+    printf("3) Build an MST (Kruskal's Algorithm)\n");
+    printf("4) Build an MST (Prim's Algorithm)\n");
+    printf("5) Breadth-first search (BFS)\n");
+    printf("6) Comparison of MST construction algorithms\n");
     printf("Enter the number of the menu item you selected:\n");
 
         // Buffer for input string
@@ -74,11 +75,13 @@ int Menu() {
         // - sscanf should successfully read the number
         // - number should be from 1 to 6
 
-        if ((strlen(buffer) != 2) || (sscanf(buffer, "%d", &number) != 1)  ||
+        if ((strlen(buffer) != 2) || (sscanf(buffer, "%d",
+            &number) != 1)  ||
             (number != 1 && number != 2 && number != 3 &&
                 number != 4 && number != 5 && number != 6)) {
             printf("Input error\n");
-            printf("Enter one integer from 1 to 6 without spaces or other symbols:\n\n");
+            printf("Enter one integer from 1 to 6 without spaces"
+                   " or other symbols:\n\n");
         }
 
         // Input is correct, exit loop
@@ -143,7 +146,8 @@ void PrintBFS(Graph *g, int *order, int orderLen, double timeMS) {
         int vertexIndex = order[i];
 
         // Check index validity and presence of city name
-        if (vertexIndex >= 0 && vertexIndex < g->numVertices && g->cityNames[vertexIndex] != NULL) {
+        if (vertexIndex >= 0 && vertexIndex < g->numVertices && 
+            g->cityNames[vertexIndex] != NULL) {
             printf("%s [%d]", g->cityNames[vertexIndex], vertexIndex);
         } else {
             printf("[vertex %d]", vertexIndex);
