@@ -127,11 +127,13 @@ void PrintComparison(const Comparison* cmp) {
 }
 
 // Function to display basic graph information
-void PrintGraphInfo(int numVertices,int numEdges) {
+void PrintGraphInfo(int numVertices, int numEdges) {
     printf("You have uploaded the graph.\n");
-    printf("Vertices: %d\n", numVertices);
-    printf("Edges: %d\n", numEdges);
-
+    printf("---------------------\n");
+    printf("| Vertces | Egges   |\n");
+    printf("---------------------\n");
+    printf("| %-7d | %-7d |\n", numVertices, numEdges);
+    printf("---------------------\n");
 }
 
 
