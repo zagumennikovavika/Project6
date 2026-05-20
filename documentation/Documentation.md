@@ -359,3 +359,36 @@ MSTResult* prim(const Graph* graph) {
     return result;
 }
 ```
+## Graph File Format
+
+### Format 1 (Edge List):
+```
+1
+5
+Moscow
+Saint-Petersburg
+Novosibirsk
+Yekaterinburg
+Kazan
+0 1 743
+0 2 3245
+1 3 2356
+3 4 2422
+```
+
+### Format 2 (Adjacency Matrix):
+```
+2
+5
+Moscow
+Saint-Petersburg
+Novosibirsk
+Yekaterinburg
+Kazan
+0 743 3245 0 0
+743 0 0 2356 0
+3245 0 0 0 1560
+0 2356 0 0 2422
+0 0 1560 2422 0
+```
+
