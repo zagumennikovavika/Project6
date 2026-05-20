@@ -263,7 +263,7 @@ void FreeDijkstraResult(DijkstraResult* result) {
 int* GetPath(const DijkstraResult* result, const Graph* graph, int target, int *pathLen) {
     if (result == NULL || graph == NULL) return NULL;
     if (target < 0 || target >= graph -> numVertices) return NULL;
-    if (result->dist[target] == INT_MAX) return NULL;
+    if (result -> dist[target] == INT_MAX) return NULL;
     
 
     // Собираем путь в обратном порядке
