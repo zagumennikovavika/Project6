@@ -41,33 +41,36 @@ void AddEdge(Graph* graph, int u, int v, int weight){
     graph -> matrix[v] = edge2;
 }   
 
-Graph* LoadGraphEdges(const char* filename){
+Graph* LoadGraphEdges(const char* filename) {
     FILE* file = fopen(filename, "r");
     if (file == NULL) return NULL;
 
     int vertexCount;
-    char line[MAX_LINE];
+    fscanf(file, "%d", &vertexCount);
+    fgetc(file);  
 
-    fscanf(file, "%d\n", &vertexCount);
-    
     Graph* graph = CreateGraph(vertexCount);
     if (graph == NULL) {
         fclose(file);
         return NULL;
     }
 
-    for(int i = 0; i < vertexCount; i++){
-        fgets(line, MAX_LINE, file);
+    char line[MAX_LINE];
+    for (int i = 0; i < vertexCount; i++) {
+        if (fgets(line, MAX_LINE, file) == NULL) break;
         line[strcspn(line, "\n")] = '\0';
-        graph -> cityNames[i] = malloc(strlen(line) + 1);
-        strcpy(graph->cityNames[i], line);
+        
+        graph->cityNames[i] = malloc(strlen(line) + 1);
+        if (graph->cityNames[i]) 
+            strcpy(graph->cityNames[i], line);
+        
     }
-    
-    int u, v , weight;
 
-    while (fscanf(file, "%d %d %d", &u, &v, &weight) == 3)
+    int u, v, weight;
+    while (fscanf(file, "%d %d %d", &u, &v, &weight) == 3) 
         AddEdge(graph, u, v, weight);
     
+
     fclose(file);
     return graph;
 }
@@ -79,7 +82,8 @@ Graph* loadGraphMatrix(const char* filename){
     int vertexCount;
     char line[MAX_LINE];
 
-    fscanf(file, "%d\n", &vertexCount);
+    fscanf(file, "%d", &vertexCount);
+    fgetc(file);
 
     Graph* graph = CreateGraph(vertexCount);
     if (graph == NULL) {
@@ -256,16 +260,16 @@ void FreeDijkstraResult(DijkstraResult* result) {
     free(result);
 }
 
-int* GetPath(const DijkstraResult* result, const Graph* graph, int target) {
-    if (result == NULL || graph == NULL) return;
-    if (target < 0 || target >= graph -> numVertices) return;
-
-    if (result->dist[target] == INT_MAX) {
-        return ERROR;
-    }
+int* GetPath(const DijkstraResult* result, const Graph* graph, int target, int *pathLen) {
+    if (result == NULL || graph == NULL) return NULL;
+    if (target < 0 || target >= graph -> numVertices) return NULL;
+    if (result->dist[target] == INT_MAX) return NULL;
+    
 
     // Собираем путь в обратном порядке
-    int path[graph -> numVertices];
+    int* path = (int*)malloc(graph -> numVertices * sizeof(int));
+    if (path == NULL) return NULL;
+
     int pathLength = 0;
     int current = target;
 
@@ -273,7 +277,7 @@ int* GetPath(const DijkstraResult* result, const Graph* graph, int target) {
         path[pathLength++] = current;
         current = result -> prev[current];
     }
-
+    
     int l = 0, r = pathLength - 1;
     while (l < r) {
 
@@ -284,6 +288,9 @@ int* GetPath(const DijkstraResult* result, const Graph* graph, int target) {
         l++;
         r--;
     }
+    
+    path = realloc(path, pathLength * sizeof(int));
+    *pathLen = pathLength;
 
     return path;
 }

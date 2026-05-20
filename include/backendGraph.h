@@ -51,7 +51,7 @@ int FindMinDistance(int distance, int visited, int numVertices);
 DijkstraResult dijkstra(const Graph graph, int start);
 void PrintDijkstraResult(const DijkstraResult result, const Graph graph);
 void FreeDijkstraResult(DijkstraResult* result);
-int* GetPath(const DijkstraResult* result, const Graph* graph, int target);
+int* GetPath(const DijkstraResult* result, const Graph* graph, int target, int *pathLen);
 Queue* CreateQueue();
 void Enqueue(Queue* q, int value);
 int Dequeue(Queue* q);
