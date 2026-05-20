@@ -1,5 +1,6 @@
 #ifndef DSU_H
 #define DSU_H
+#include "common.h"
 
 typedef struct {
     int parent;

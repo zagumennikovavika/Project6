@@ -2,11 +2,14 @@
 #include "mst_compare.h"
 #include "mst_algorithms.h"
 
-
+#ifdef _WIN32
+    #include <windows.h>   
+#endif
 double GetTime() {
-    struct timespec ts;
-    clock_gettime(CLOCK_MONOTONIC, &ts);
-    return (double)ts.tv_sec + (double)ts.tv_nsec / 1e9;
+    LARGE_INTEGER freq, count;
+    QueryPerformanceFrequency(&freq);
+    QueryPerformanceCounter(&count);
+    return (double)count.QuadPart / (double)freq.QuadPart;
 }
 
 Comparison CompareMST(const Graph* g) {
