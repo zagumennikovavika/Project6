@@ -50,7 +50,7 @@ int Menu() {
 
     printf("GraphMaster: Route planner and network analyzer\n\n");
 
-    do {
+
     printf("Main menu:\n");
     printf("1) Load graph from file\n");
     printf("2) Find the shortest path between points"
@@ -60,6 +60,7 @@ int Menu() {
     printf("5) Breadth-first search (BFS)\n");
     printf("6) Comparison of MST construction algorithms\n");
     printf("Enter the number of the menu item you selected:\n");
+    do {
 
         // Buffer for input string
         char buffer[100];
@@ -77,12 +78,12 @@ int Menu() {
 
         if ((strlen(buffer) != 2) || (sscanf(buffer, "%d",
             &number) != 1)  ||
-            (number != 1 && number != 2 && number != 3 &&
+            (number != 0 && number != 1 && number != 2 && number != 3 &&
                 number != 4 && number != 5 && number != 6)) {
             printf("Input error\n");
             printf("Enter one integer from 1 to 6 without spaces"
                    " or other symbols:\n\n");
-        }
+                }
 
         // Input is correct, exit loop
         else
