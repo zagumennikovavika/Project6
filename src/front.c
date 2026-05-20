@@ -47,9 +47,9 @@ int Menu() {
 
     // Input success flag
     int flag = 0;
-
+    printf("==============================================================\n");
     printf("GraphMaster: Route planner and network analyzer\n\n");
-
+    printf("==============================================================\n");
 
     printf("Main menu:\n");
     printf("1) Load graph from file\n");
@@ -59,6 +59,7 @@ int Menu() {
     printf("4) Build an MST (Prim's Algorithm)\n");
     printf("5) Breadth-first search (BFS)\n");
     printf("6) Comparison of MST construction algorithms\n");
+    printf("0) Exiting the program\n");
     printf("Enter the number of the menu item you selected:\n");
     do {
 
@@ -80,6 +81,7 @@ int Menu() {
             &number) != 1)  ||
             (number != 0 && number != 1 && number != 2 && number != 3 &&
                 number != 4 && number != 5 && number != 6)) {
+
             printf("Input error\n");
             printf("Enter one integer from 1 to 6 without spaces"
                    " or other symbols:\n\n");
@@ -94,16 +96,17 @@ int Menu() {
     while (flag == 0);
     return number;
 
-}
+} 
 
 
 // Function to display algorithm comparison table
 void PrintComparison(const Comparison* cmp) {
 
+    printf("==============================================================\n");
 
     printf("                    ALGORITHM COMPARISON                     \n");
 
-    printf("------------------------------------------------------------\n");
+    printf("==============================================================\n");
 
 
 
@@ -123,7 +126,7 @@ void PrintComparison(const Comparison* cmp) {
            "Number of edges", cmp->numEdges, cmp->numEdges);
 
     printf("------------------------------------------------------------\n");
-
+    
 }
 
 // Function to display basic graph information
@@ -134,14 +137,17 @@ void PrintGraphInfo(int numVertices, int numEdges) {
     printf("---------------------\n");
     printf("| %-7d | %-7d |\n", numVertices, numEdges);
     printf("---------------------\n");
-}
+
+} 
+
 
 
 // Function to display Breadth-First Search (BFS) traversal result
 void PrintBFS(Graph *g, int *order, int orderLen, double timeMS) {
 
-
+    printf("\n========================================================\n");
     printf("\nVertex traversal order (BFS):\n");
+    printf("\n========================================================\n");
 
 
     // Display vertex traversal order
@@ -165,19 +171,20 @@ void PrintBFS(Graph *g, int *order, int orderLen, double timeMS) {
     printf("\n\nCities visited: %d\n", orderLen);
 
     // Display execution time
-    printf("Time: %.3f seconds\n", timeMS / 1000.0);
+    printf("Time: %.3f seconds\n", timeMS);
 
-
+    
 }
 
 // Function to display Minimum Spanning Tree (MST)
 void PrintMST(const MSTResult *res, Graph *g) {
 
 
-
-    printf("Minimum spanning tree (MST):\n\n");
+    printf("\n========================================================\n");
+    printf("Minimum spanning tree (MST):\n");
+    printf("\n========================================================\n");
     printf("Edges of MST:\n");
-    printf("--------------------------------------------------------\n");
+
 
     // Display all MST edges
     for (int i = 0; i < res->numEdges; i++) {
@@ -201,19 +208,20 @@ void PrintMST(const MSTResult *res, Graph *g) {
     printf("--------------------------------------------------------\n");
     printf("Total weight of the tree: %d\n", res->totalWeight);
     printf("Number of edges in MST: %d\n", res->numEdges);
-
+    
 }
 
 // Function to display Dijkstra's algorithm result
 // (shortest path)
-void Dijkstra(Graph *g, const int *path, int pathLen,
+void PrintDijkstra(Graph *g, const int *path, int pathLen,
     int totalWeight, double timeMS) {
     if (g == NULL || path == NULL || pathLen <= 0) {
         printf("Error: Invalid path data\n");
         return;
     }
-
+    printf("\n========================================================\n");
     printf("\nShortest path:\n");
+    printf("\n========================================================\n");
 
     // Display path in "City -> City -> ..." format
     for (int i = 0; i < pathLen; i++) {
@@ -236,6 +244,12 @@ void Dijkstra(Graph *g, const int *path, int pathLen,
     printf("\n\nPath length: %d units\n", totalWeight);
 
     // Display execution time
-    printf("Execution time: %.3f seconds\n", timeMS / 1000.0);
+    printf("Execution time: %.3f seconds\n", timeMS);
+    
+}
 
+void WaitForUser() {
+    printf("\nPress Enter to continue...");
+    while (getchar() != '\n');  
+    getchar();  
 }

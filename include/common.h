@@ -5,7 +5,6 @@
 #include <string.h>
 #include <stdlib.h>
 
-#define MAX_PATH 256
 #define ERROR (-1)
 
 // Structure for comparing MST construction algorithms
@@ -46,5 +45,16 @@ typedef struct {
     int *prev;
     int source;
 }DijkstraResult;
+
+typedef struct Node {
+    int number;
+    struct Node* next;
+} Node;
+
+typedef struct {
+    int number;
+    Node* head;
+    Node* rear;
+} Queue;
 
 #endif //COMMON_H

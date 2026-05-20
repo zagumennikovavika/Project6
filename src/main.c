@@ -2,6 +2,13 @@
 #include <stdlib.h>
 #include <string.h>
 #include <limits.h>  
+#include "front.h"
+#include "mst_algorithms.h" 
+#include "mst_compare.h"
+#include "backendGraph.h"  
+#include "front.h"         
+#include "common.h" 
+#include "dsu.h"
 
 int main() {
     Graph* g = NULL;
@@ -14,7 +21,6 @@ int main() {
             case 1: // Загрузка графа 
             {
                 char* filename = AskFilename();
-                CheckFile(filename);
 
                 // Освобождаем старый граф, если был
                 if (g) {
@@ -22,16 +28,16 @@ int main() {
                     g = NULL;
                 }
 
-                g = loadGraphEdges(filename);
+                g = LoadGraphEdges(filename);
                 if (!g) {
-                    g = loadGraphMatrix(filename);
+                    g = LoadGraphMatrix(filename);
                 }
                 // Если не загрузился, то берём дефолтный
                 if (!g) {
                     printf("Не удалось загрузить файл. Использую граф по умолчанию.\n");
-                    g = loadGraphEdges("tests/default.txt");
+                    g = LoadGraphEdges("tests/default.txt");
                     if (!g) {
-                        g = loadGraphMatrix("tests/default.txt");
+                        g = LoadGraphMatrix("tests/default.txt");
                     }
                 }
 
@@ -42,7 +48,9 @@ int main() {
                     printf("Не удалось загрузить граф.\n");
                 }
                 free(filename);
+                
                 break;
+                
             }
             
             case 2: // Дейкстра
@@ -54,36 +62,50 @@ int main() {
                 // Показываем список городов
                 printf("\nДоступные города:\n");
                 for (int i = 0; i < g->numVertices; i++) {   
-                    printf("  %d - %s\n", i, g->city_names[i]);
+                    printf("  %d - %s\n", i, g->cityNames[i]);
                 }
-
+ 
                 int start, end;
                 printf("Введите стартовую вершину (0..%d): ", g->numVertices - 1);
                 scanf("%d", &start);
+                { int c; while ((c = getchar()) != '\n' && c != EOF); }
                 printf("Введите конечную вершину (0..%d): ", g->numVertices - 1);
                 scanf("%d", &end);
-
+                { int c; while ((c = getchar()) != '\n' && c != EOF); }
+ 
                 if (start < 0 || start >= g->numVertices || end < 0 || end >= g->numVertices) {
                     printf("Ошибка: неверный номер вершины\n");
                     break;
                 }
                 
-                DijkstraResult* res = dijkstra(g, start);
+                //Замер времени
+                double startTime = GetTime();
+                DijkstraResult* res = Dijkstra(g, start);
+                double endTime = GetTime();
+                double timeMS = (endTime - startTime) * 1000.0;
+ 
                 if (!res) {
                     printf("Ошибка выполнения алгоритма Дейкстры\n");
                     break;
                 }
-
+ 
+ 
                 // Проверяем существует ли путь
                 if (res->dist[end] == INT_MAX) {
                     printf("Пути не существует\n");
                 } else {
-                    int pathLen;
-                    int* path = getPath(res, end, &pathLen);
-                    PrintDijkstra(g, path, pathLen, res->dist[end]);
-                    free(path);
+                    int pathLen = 0;
+                    int* path = GetPath(res, g, end, &pathLen); 
+        
+                    if (path == NULL || pathLen <= 0) {
+                        printf("Ошибка: не удалось восстановить путь\n");
+                    } else {
+                        PrintDijkstra(g, path, pathLen, res->dist[end], timeMS);
+                        free(path);
+                    }
                 }
 
+ 
                 FreeDijkstraResult(res);
                 break;
             }
@@ -99,7 +121,7 @@ int main() {
                 if (res == NULL) {
                     printf("Невозможно построить MST, граф несвязный\n");
                 } else {
-                    PrintMST(res);
+                    PrintMST(res, g);
                     FreeMSTResult(res);
                 }
                 break;
@@ -116,7 +138,7 @@ int main() {
                 if (res == NULL) {
                     printf("Невозможно построить MST, граф несвязный\n");
                 } else {
-                    PrintMST(res);
+                    PrintMST(res, g);
                     FreeMSTResult(res);
                 }
                 break;
@@ -132,12 +154,13 @@ int main() {
                 // Показываем список городов
                 printf("\nДоступные города:\n");
                 for (int i = 0; i < g->numVertices; i++) {
-                    printf("  %d - %s\n", i, g->city_names[i]);
+                    printf("  %d - %s\n", i, g->cityNames[i]);
                 }
 
                 int start;
                 printf("Введите стартовую вершину (0..%d): ", g->numVertices - 1);
                 scanf("%d", &start);
+                { int c; while ((c = getchar()) != '\n' && c != EOF); }
 
                 if (start < 0 || start >= g->numVertices) {
                     printf("Ошибка: неверный номер вершины\n");
@@ -145,12 +168,17 @@ int main() {
                 }
 
                 int orderLen; 
-                int* order = BFS(g, start, &orderLen);
-            
+                
+                //Замер времени
+                double startT = GetTime();
+                int* order = BFS(g, start, &orderLen);   
+                double endT = GetTime();
+                double time2MS = (endT - startT) * 1000.0;
+
                 if (order == NULL || orderLen == 0) {
                     printf("Ошибка: обход не выполнен\n");
                 } else {
-                    PrintBFS(g, order, orderLen);
+                    PrintBFS(g, order, orderLen, time2MS);
                     free(order);
                 }
                 break;
@@ -170,7 +198,7 @@ int main() {
             
             case 0: // Выход
             {
-                printf("Выход из программы.\n");
+                printf("Goodbye! The program is completed.\n");
                 break;
             }
             
@@ -187,4 +215,4 @@ int main() {
     }
     
     return 0;
-}
+} 

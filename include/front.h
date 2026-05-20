@@ -2,7 +2,7 @@
 #define GRAPH_MASTER_FRONT1_H
 #include "common.h"
 
-void Dijkstra(Graph *g, const int *path, int pathLen, int totalWeight, double timeMS);
+void PrintDijkstra(Graph *g, const int *path, int pathLen, int totalWeight, double timeMS);
 char* AskFilename();
 int Menu();
 void PrintGraphInfo(int numVertices,int numEdges);
