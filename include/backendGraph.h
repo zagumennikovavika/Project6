@@ -6,6 +6,8 @@
 #include <limits.h>
 #include <string.h>
 #include "common.h"
+#include <assert.h>
+#include <ctype.h>
 
 #define MAX_LINE 256
 

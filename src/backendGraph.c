@@ -1,5 +1,10 @@
 #include "backendGraph.h"
 
+/*
+each vertex stores a linked list of neighbors,
+so one edge node represents one connection
+to another vertex with a specific weight
+*/
 EdgeNode* CreateEdgeNode(int num, int weight){
     EdgeNode* Node = (EdgeNode*)malloc(sizeof(EdgeNode));
     if (Node == NULL) return NULL;
@@ -11,6 +16,18 @@ EdgeNode* CreateEdgeNode(int num, int weight){
     return Node;
 }
 
+/*
+the graph structure consists of numVertices,
+the number of vertices, numEdges,
+the number of edges, matrix, an array of edge lists,
+and cityNames, an array of pointers
+*/
+
+/*
+the graph uses an adjacency list representation:
+matrix[i] stores the head of the linked list
+for all neighbors of vertex i
+*/
 Graph* CreateGraph(int numVertices){
     Graph* graph = (Graph*)malloc(sizeof(Graph));
     if (graph == NULL) return NULL;
@@ -29,6 +46,11 @@ Graph* CreateGraph(int numVertices){
     return graph;
 }
 
+/*
+because the graph is undirected,
+the edge must be added in both directions:
+u -> v and v -> u
+*/
 void AddEdge(Graph* graph, int u, int v, int weight){
     graph -> numEdges += 1;
 
@@ -41,13 +63,20 @@ void AddEdge(Graph* graph, int u, int v, int weight){
     graph -> matrix[v] = edge2;
 }  
 
+/*
+first all city names are loaded,
+then all edges are read and connected
+*/
 Graph* LoadGraphEdges(const char* filename) {
+    if (CheckFileToLoad(filename) == NULL) return NULL;
+
     FILE* file = fopen(filename, "r");
     if (file == NULL) return NULL;
 
-    int vertexCount;
-    fscanf(file, "%d", &vertexCount);
-    fgetc(file);  
+    int vertexCount, format;
+    
+    fscanf(file, "%d\n%d", &format, &vertexCount);
+    fgetc(file);   
 
     Graph* graph = CreateGraph(vertexCount);
     if (graph == NULL) {
@@ -75,14 +104,21 @@ Graph* LoadGraphEdges(const char* filename) {
     return graph;
 }
 
+/*
+the matrix format stores all connections in NxN form,
+but only the upper triangle is used
+to avoid duplicating undirected edges
+*/
 Graph* LoadGraphMatrix(const char* filename){
+    if (CheckFileToLoad(filename) == NULL) return NULL;
+
     FILE* file = fopen(filename, "r");
     if (file == NULL) return NULL;
 
-    int vertexCount;
+    int vertexCount, format;
     char line[MAX_LINE];
 
-    fscanf(file, "%d", &vertexCount);
+    fscanf(file, "%d\n%d", &format, &vertexCount);
     fgetc(file);
 
     Graph* graph = CreateGraph(vertexCount);
@@ -116,8 +152,9 @@ int SaveGraphEdges(const Graph* graph, const char* filename){
     if (file == NULL) return ERROR;
 
     int numVertices = graph -> numVertices;
-    
-    fprintf(file, "%d\n", numVertices);
+    int format = 1;
+
+    fprintf(file, "%d\n%d\n", format, numVertices);
 
     for(int i = 0; i < numVertices; i++)
         fprintf(file, "%s\n", graph -> cityNames[i]);
@@ -125,6 +162,10 @@ int SaveGraphEdges(const Graph* graph, const char* filename){
     for(int i = 0; i < numVertices; i++){
         EdgeNode* edge = graph -> matrix[i];
     
+        /*
+        only edges where i < edge->number are written,
+        otherwise every undirected edge would appear twice
+        */
         while (edge != NULL){
             if (i < edge -> number)
                 fprintf(file, "%d %d %d\n", i, edge -> number,
@@ -138,6 +179,10 @@ int SaveGraphEdges(const Graph* graph, const char* filename){
     return 0;
 }
 
+/*
+recursive deletion walks through the entire linked list
+before freeing nodes in reverse order
+*/
 void FreeAdgeNode(EdgeNode* node){
     if (node == NULL)
         return;
@@ -145,7 +190,6 @@ void FreeAdgeNode(EdgeNode* node){
     FreeAdgeNode(node -> next);
     free(node);
 }
-
 
 void FreeGraph(Graph* graph){
     if(graph == NULL) return;
@@ -160,6 +204,10 @@ void FreeGraph(Graph* graph){
     free(graph);
 }
 
+/*
+the algorithm searches for the closest unvisited vertex,
+which becomes the next step in Dijkstra's algorithm
+*/
 int FindMinDistance(int *distance, int *visited, int numVertices){
     int minDistance = INT_MAX;
     int minVertex = -1;
@@ -173,6 +221,11 @@ int FindMinDistance(int *distance, int *visited, int numVertices){
     return minVertex;
 }
 
+/*
+distance[] stores the shortest known distance,
+previous[] stores the previous vertex in the path,
+visited[] prevents processing the same vertex twice
+*/
 DijkstraResult* Dijkstra(const Graph *graph, int start){
     int numVertices = graph -> numVertices;
 
@@ -207,6 +260,10 @@ DijkstraResult* Dijkstra(const Graph *graph, int start){
             int v = node -> number;
             int weight = node -> weight;
 
+            /*
+            every relaxation checks whether going through u
+            creates a shorter path to vertex v
+            */
             if (!visited[v] && distance[u] != INT_MAX
                 && distance[u] + weight < distance[v]){
                 distance[v] = distance[u] + weight;
@@ -265,9 +322,10 @@ int* GetPath(const DijkstraResult* result, const Graph* graph, int target, int *
     if (target < 0 || target >= graph -> numVertices) return NULL;
     if (result->dist[target] == INT_MAX) return NULL;
 
-    
-
-    // Собираем путь в обратном порядке
+    /*
+    the path is reconstructed backwards:
+    target -> previous vertex -> ... -> source
+    */
     int* path = (int*)malloc(graph -> numVertices * sizeof(int));
     if (path == NULL) return NULL;
 
@@ -279,6 +337,10 @@ int* GetPath(const DijkstraResult* result, const Graph* graph, int target, int *
         current = result -> prev[current];
     }
     
+    /*
+    the path was built in reverse order,
+    so it must be reversed to get source -> target
+    */
     int l = 0, r = pathLength - 1;
     while (l < r) {
 
@@ -296,7 +358,7 @@ int* GetPath(const DijkstraResult* result, const Graph* graph, int target, int *
     return path;
 }
 
-// Создание пустой очереди
+// Create an empty queue
 Queue* CreateQueue() {
     Queue* q = malloc(sizeof(Queue));
     if (q == NULL) return NULL;
@@ -307,7 +369,7 @@ Queue* CreateQueue() {
     return q;
 }
 
-// Добавление элемента в конец очереди
+// Add an element to the end of the queue
 void Enqueue(Queue* q, int value) {
     if (q == NULL) return;
 
@@ -318,41 +380,40 @@ void Enqueue(Queue* q, int value) {
     newNode->next = NULL;
 
     if (q -> rear == NULL) {
-        // Очередь была пуста — новый узел и голова, и хвост
+        // The queue was empty — the new node is both head and tail
         q -> head = newNode;
         q -> rear = newNode;
     } else {
-        // Прицепляем к хвосту и обновляем хвост
+        // Attach to the tail and update the tail
         q -> rear->next = newNode;
         q -> rear = newNode;
     }
 }
 
-// Удаление элемента из начала очереди
+// Remove an element from the beginning of the queue
 int Dequeue(Queue* q) {
     if (q == NULL || q -> head == NULL) return -1;
     
-
     Node* tmp = q -> head;
     int value = tmp->number;
 
     q -> head = q -> head -> next;
 
     if (q -> head == NULL) 
-        q -> rear = NULL;  // Очередь стала пустой
+        q -> rear = NULL;  // The queue became empty
     
 
     free(tmp);
     return value;
 }
 
-// Проверка на пустоту (1 — пуста, 0 — не пуста)
+// Check if the queue is empty (1 — empty, 0 — not empty)
 int IsEmpty(Queue* q) {
     if (q == NULL) return 1;
     return q -> head == NULL;
 }
 
-// Очистка всей очереди
+// Free the entire queue
 void FreeQueue(Queue* q) {
     if (q == NULL) return;
 
@@ -365,22 +426,23 @@ void FreeQueue(Queue* q) {
     free(q);
 }
 
+/*
+BFS explores vertices level by level,
+using a queue to process vertices
+in the order they were discovered
+*/
 int* BFS(const Graph* graph, int start, int* orderlen) {
     if (graph == NULL || orderlen == NULL) return NULL;
 
     int V = graph -> numVertices;
 
-    // Массив для результата (порядок обхода)
     int* order = malloc(V * sizeof(int));
     if (order == NULL) return NULL;
 
-    // Массив visited (чтобы не зациклиться)
     int* visited = calloc(V, sizeof(int));
 
-    // Очередь
     Queue* q = CreateQueue();
 
-    // Начинаем со стартовой вершины
     visited[start] = 1;
     Enqueue(q, start);
 
@@ -388,13 +450,16 @@ int* BFS(const Graph* graph, int start, int* orderlen) {
 
     while (!IsEmpty(q)) {
         int u = Dequeue(q);
-        order[orderIndex++] = u;   // записываем вершину в результат
+        order[orderIndex++] = u;
 
-        // Все соседи u
         EdgeNode* edge = graph->matrix[u];
         while (edge != NULL) {
             int v = edge->number;
 
+            /*
+            a vertex is marked visited immediately after insertion,
+            otherwise the same vertex could be added multiple times
+            */
             if (!visited[v]) {
                 visited[v] = 1;
                 Enqueue(q, v);
@@ -404,10 +469,152 @@ int* BFS(const Graph* graph, int start, int* orderlen) {
         }
     }
 
-    *orderlen = orderIndex;   // сколько вершин обошли
+    *orderlen = orderIndex;
 
     free(visited);
     FreeQueue(q);
 
     return order;
+}
+
+/*
+the validator first checks whether the file header
+contains the correct format and vertex count
+*/
+void* CheckFileToLoad(const char* filename){
+    int format, count;
+
+    FILE* file = fopen(filename, "r");
+    if (file == NULL) return NULL;
+
+    if (fscanf(file, "%d\n%d", &format, &count) != 2){
+        fclose(file);
+        return NULL;
+    }
+    fgetc(file);
+    
+    char line[MAX_LINE];
+
+    // Save the position before reading the line
+    long pos = ftell(file);
+
+    fgets(line, MAX_LINE, file);
+
+    int score = 0;
+
+    /*
+    city names are expected before graph data,
+    so the function counts text lines first
+    */
+    while (isalpha(line[0]) != 0){
+        score++;
+
+        // Update the position before reading the next line
+        pos = ftell(file);
+        
+        if (fgets(line, MAX_LINE, file) == NULL) 
+            break;
+    }
+
+    if (score != count){
+        fclose(file);
+        return NULL;
+    }
+
+    /*
+    after counting city names,
+    the file pointer is returned to the start
+    of the graph data section
+    */
+    fseek(file, pos, SEEK_SET);
+
+    /*
+    format 1 expects edge list representation:
+    u v weight
+    */
+    if (format == 1){
+        int u, v, weight, charN;
+           
+        while (fgets(line, MAX_LINE, file) != NULL) {
+            char extra;
+            line[strcspn(line, "\n")] = 0;
+
+            /*
+            %n stores the position after the last parsed number,
+            which helps detect malformed lines
+            */
+            if (sscanf(line, "%d %d %d %n", &u, &v, &weight, &charN) != 3) {
+                fclose(file);
+                return NULL;
+            }
+
+            // There must be nothing after the three numbers
+            if (sscanf(line, "%d %d %d %c", &u, &v, &weight, &extra) == 4) {
+                fclose(file);
+                return NULL;
+            }
+        }
+    }
+
+    /*
+    format 2 expects a square adjacency matrix,
+    so every row must contain exactly count numbers
+    */
+    else if (format == 2){
+        int rowCount = 0;
+
+        while (fgets(line, MAX_LINE, file) != NULL) {
+
+            int colCount = 0;
+
+            char* ptr = line;
+            char* end;
+
+            while (1) {
+
+                // Skip spaces
+                while (isspace(*ptr))
+                    ptr++;
+
+                // End of line
+                if (*ptr == '\0' || *ptr == '\n')
+                    break;
+
+                /*
+                strtol moves the end pointer after the parsed number,
+                allowing the line to be scanned step by step
+                */
+                strtol(ptr, &end, 10);
+
+                // Number was not found
+                if (ptr == end) {
+                    fclose(file);
+                    return NULL;
+                }
+
+                colCount++;
+
+                ptr = end;
+            }
+
+            // Check the number of values
+            if (colCount != count) {
+                fclose(file);
+                return NULL;
+            }
+
+            rowCount++;
+        }
+
+        // Check the number of rows
+        if (rowCount != count) {
+            fclose(file);
+            return NULL;
+        }
+
+        fclose(file);
+        return;
+    }
+
+    return NULL;
 }
