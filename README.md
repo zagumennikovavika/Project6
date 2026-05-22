@@ -28,6 +28,7 @@
 
 ### Format 1 (Edge List):
 ```
+1
 5
 Moscow
 Saint-Petersburg
@@ -42,6 +43,7 @@ Kazan
 
 ### Format 2 (Adjacency Matrix):
 ```
+2
 5
 Moscow
 Saint-Petersburg
