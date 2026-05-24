@@ -1,5 +1,6 @@
 #include "backendGraph.h"
 
+#define MAX_LINE 256
 /*
 each vertex stores a linked list of neighbors,
 so one edge node represents one connection
@@ -554,6 +555,9 @@ void* CheckFileToLoad(const char* filename){
                 return NULL;
             }
         }
+        
+        fclose(file);
+        return (void*)1;
     }
 
     /*
@@ -612,9 +616,10 @@ void* CheckFileToLoad(const char* filename){
             return NULL;
         }
 
-        fclose(file);
-        return;
+    fclose(file);
+    return (void*)1;
     }
 
+    fclose(file);
     return NULL;
 }
