@@ -59,8 +59,12 @@ Kazan
 
 
 ## Build and Run
-
-
+```
+make        - build program
+make run    - build and run program
+make test   - build and run tests
+make clean  - delete exe files
+```
 
 
 
