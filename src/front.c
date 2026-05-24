@@ -48,7 +48,7 @@ int Menu() {
     // Input success flag
     int flag = 0;
     printf("==============================================================\n");
-    printf("GraphMaster: Route planner and network analyzer\n\n");
+    printf("      GraphMaster: Route planner and network analyzer\n");
     printf("==============================================================\n");
 
     printf("Main menu:\n");
@@ -103,9 +103,7 @@ int Menu() {
 void PrintComparison(const Comparison* cmp) {
 
     printf("==============================================================\n");
-
     printf("                    ALGORITHM COMPARISON                     \n");
-
     printf("==============================================================\n");
 
 
@@ -146,7 +144,7 @@ void PrintGraphInfo(int numVertices, int numEdges) {
 void PrintBFS(Graph *g, int *order, int orderLen, double timeMS) {
 
     printf("\n========================================================\n");
-    printf("\nVertex traversal order (BFS):\n");
+    printf("            Vertex traversal order (BFS):\n");
     printf("\n========================================================\n");
 
 
@@ -181,7 +179,7 @@ void PrintMST(const MSTResult *res, Graph *g) {
 
 
     printf("\n========================================================\n");
-    printf("Minimum spanning tree (MST):\n");
+    printf("            Minimum spanning tree (MST):\n");
     printf("\n========================================================\n");
     printf("Edges of MST:\n");
 
@@ -248,8 +246,3 @@ void PrintDijkstra(Graph *g, const int *path, int pathLen,
     
 }
 
-void WaitForUser() {
-    printf("\nPress Enter to continue...");
-    while (getchar() != '\n');  
-    getchar();  
-}

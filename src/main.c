@@ -10,6 +10,32 @@
 #include "common.h" 
 #include "dsu.h"
 
+int GetFormat(const char* filename) {
+    FILE* f = fopen(filename, "r");
+    if (!f) return 0;
+    
+    int format;
+    fscanf(f, "%d", &format);
+    fclose(f);
+    
+    if (format == 1 || format == 2) {
+        return format;
+    }
+    return 0; 
+}
+
+int AskToContinue() {
+    char answer;
+    printf("\nDo you want to return to the main menu? (y/n): ");
+    scanf(" %c", &answer);
+    { int c; while ((c = getchar()) != '\n' && c != EOF); } 
+    
+    if (answer == 'y' || answer == 'Y') {
+        return 1;  
+    } else {
+        return 0;  
+    }
+}
 int main() {
     Graph* g = NULL;
     int number;                     
@@ -18,87 +44,90 @@ int main() {
         number = Menu();           
         
         switch(number) {
-            case 1: // Загрузка графа 
+            case 1: // Graph Loading
             {
                 char* filename = AskFilename();
-
-                // Освобождаем старый граф, если был
+                int format = GetFormat(filename);  
+                
                 if (g) {
                     FreeGraph(g);
                     g = NULL;
                 }
 
-                g = LoadGraphEdges(filename);
-                if (!g) {
+                if (format == 1) {
+                    g = LoadGraphEdges(filename);
+                } else if (format == 2) {
                     g = LoadGraphMatrix(filename);
+                } else {
+                    printf("Unknown file format\n");
                 }
-                // Если не загрузился, то берём дефолтный
+        
+
+                // If it didn't load, then we take the default one.
                 if (!g) {
-                    printf("Не удалось загрузить файл. Использую граф по умолчанию.\n");
-                    g = LoadGraphEdges("tests/default.txt");
+                    printf("The file could not be uploaded. I use the default graph.\n");
+                    g = LoadGraphEdges("tests/Graphs/default1.txt");
                     if (!g) {
-                        g = LoadGraphMatrix("tests/default.txt");
+                        g = LoadGraphMatrix("tests/Graphs/default2.txt");
                     }
                 }
 
                 if (g) {
-                    printf("Граф успешно загружен!\n");
+                    printf("The graph has been uploaded successfully!\n");
                     PrintGraphInfo(g->numVertices, g->numEdges);
-                } else {
-                    printf("Не удалось загрузить граф.\n");
                 }
                 free(filename);
                 
+                if (!AskToContinue()) {
+                    number = 0;  
+                }
                 break;
                 
             }
             
-            case 2: // Дейкстра
+            case 2: // Dijkstra
             {
                 if (!g) {
-                    printf("Сначала загрузите файл (пункт 1)\n");
+                    printf("Download the file first (step 1)\n");
                     break;
                 }
-                // Показываем список городов
-                printf("\nДоступные города:\n");
+                // Showing a list of cities
+                printf("\nAvailable cities:\n");
                 for (int i = 0; i < g->numVertices; i++) {   
                     printf("  %d - %s\n", i, g->cityNames[i]);
                 }
  
                 int start, end;
-                printf("Введите стартовую вершину (0..%d): ", g->numVertices - 1);
+                printf("Enter the starting vertex (0..%d): ", g->numVertices - 1);
                 scanf("%d", &start);
-                { int c; while ((c = getchar()) != '\n' && c != EOF); }
-                printf("Введите конечную вершину (0..%d): ", g->numVertices - 1);
+                printf("Enter the end vertex (0..%d): ", g->numVertices - 1);
                 scanf("%d", &end);
-                { int c; while ((c = getchar()) != '\n' && c != EOF); }
  
                 if (start < 0 || start >= g->numVertices || end < 0 || end >= g->numVertices) {
-                    printf("Ошибка: неверный номер вершины\n");
+                    printf("Error: incorrect vertex number\n");
                     break;
                 }
                 
-                //Замер времени
                 double startTime = GetTime();
                 DijkstraResult* res = Dijkstra(g, start);
                 double endTime = GetTime();
                 double timeMS = (endTime - startTime) * 1000.0;
  
                 if (!res) {
-                    printf("Ошибка выполнения алгоритма Дейкстры\n");
+                    printf("Dijkstra algorithm execution error\n");
                     break;
                 }
  
  
-                // Проверяем существует ли путь
+                // Checking if there is a path
                 if (res->dist[end] == INT_MAX) {
-                    printf("Пути не существует\n");
+                    printf("There is no way\n");
                 } else {
                     int pathLen = 0;
                     int* path = GetPath(res, g, end, &pathLen); 
         
                     if (path == NULL || pathLen <= 0) {
-                        printf("Ошибка: не удалось восстановить путь\n");
+                        printf("Mistake: couldn't restore the path\n");
                     } else {
                         PrintDijkstra(g, path, pathLen, res->dist[end], timeMS);
                         free(path);
@@ -107,39 +136,48 @@ int main() {
 
  
                 FreeDijkstraResult(res);
+                if (!AskToContinue()) {
+                    number = 0;  
+                }
                 break;
             }
 
-            case 3: // Краскал
+            case 3: // Kruskal
             {
                 if (!g) {
-                    printf("Сначала загрузите файл (пункт 1)\n");
+                    printf("Download the file first (step 1)\n");
                     break;
                 }
                 
                 MSTResult* res = kruskal(g);
                 if (res == NULL) {
-                    printf("Невозможно построить MST, граф несвязный\n");
+                    printf("It is impossible to build an MST, the graph is disconnected\n");
                 } else {
                     PrintMST(res, g);
                     FreeMSTResult(res);
                 }
+                if (!AskToContinue()) {
+                    number = 0;  
+                }
                 break;
             }
             
-            case 4: // Прим
+            case 4: // Prim
             {
                 if (!g) {
-                    printf("Сначала загрузите файл (пункт 1)\n");
+                    printf("Download the file first (step 1)\n");
                     break;
                 }
                 
                 MSTResult* res = prim(g);
                 if (res == NULL) {
-                    printf("Невозможно построить MST, граф несвязный\n");
+                    printf("It is impossible to build an MST, the graph is disconnected\n");
                 } else {
                     PrintMST(res, g);
                     FreeMSTResult(res);
+                }
+                if (!AskToContinue()) {
+                    number = 0;  
                 }
                 break;
             }
@@ -147,66 +185,67 @@ int main() {
             case 5: // BFS
             {
                 if (!g) {
-                    printf("Сначала загрузите файл (пункт 1)\n");
+                    printf("Download the file first (step 1)\n");
                     break;
                 }
 
-                // Показываем список городов
-                printf("\nДоступные города:\n");
+                printf("\nAvailable cities:\n");
                 for (int i = 0; i < g->numVertices; i++) {
                     printf("  %d - %s\n", i, g->cityNames[i]);
                 }
 
                 int start;
-                printf("Введите стартовую вершину (0..%d): ", g->numVertices - 1);
+                printf("Enter the starting vertex (0..%d): ", g->numVertices - 1);
                 scanf("%d", &start);
                 { int c; while ((c = getchar()) != '\n' && c != EOF); }
 
                 if (start < 0 || start >= g->numVertices) {
-                    printf("Ошибка: неверный номер вершины\n");
+                    printf("Error: incorrect vertex number\n");
                     break;
                 }
 
                 int orderLen; 
                 
-                //Замер времени
+                
                 double startT = GetTime();
                 int* order = BFS(g, start, &orderLen);   
                 double endT = GetTime();
                 double time2MS = (endT - startT) * 1000.0;
 
                 if (order == NULL || orderLen == 0) {
-                    printf("Ошибка: обход не выполнен\n");
+                    printf("Error: Bypass failed\n");
                 } else {
                     PrintBFS(g, order, orderLen, time2MS);
                     free(order);
                 }
+                if (!AskToContinue()) {
+                    number = 0;  
+                }
                 break;
             }
             
-            case 6: // Сравнение алгоритмов MST 
+            case 6: // Comparison of MST algorithms
             {
                 if (!g) {
-                    printf("Сначала загрузите файл (пункт 1)\n");
+                    printf("Download the file first (step 1)\n");
                     break;
                 }
 
                 Comparison cmp = CompareMST(g);  
-                PrintComparison(&cmp);                          
+                PrintComparison(&cmp);     
+
+                if (!AskToContinue()) {
+                    number = 0;  
+                }                  
                 break;
             }
             
-            case 0: // Выход
+            case 0: // Exit
             {
                 printf("Goodbye! The program is completed.\n");
                 break;
             }
             
-            default:
-            {
-                printf("Неверный выбор! Пожалуйста, выберите 0-6\n");
-                break;
-            }
         }
     } while (number != 0);   
     

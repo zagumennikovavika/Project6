@@ -1,5 +1,8 @@
 #ifndef GRAPH_MASTER_FRONT1_H
 #define GRAPH_MASTER_FRONT1_H
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
 #include "common.h"
 
 void PrintDijkstra(Graph *g, const int *path, int pathLen, int totalWeight, double timeMS);

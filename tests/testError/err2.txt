@@ -1,0 +1,9 @@
+1
+5 5
+Moscow
+SaintPetersburg
+Novosibirsk
+Ekaterinburg
+Kazan
+0 1 634
+0 2 2803
